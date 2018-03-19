@@ -18,8 +18,8 @@ old_state	new_state	new_color
 11	11	204,204,102
 12	12	255,255,0
 13	13	255,255,204
-14	14	102,51,153
-15	15	102,153,51
+14	4	102,51,153
+15	8	102,153,51
 2	2	0,153,204
 3	3	0,255,255
 4	3	0,255,255
@@ -29,13 +29,20 @@ old_state	new_state	new_color
 8	3	0,255,255
 9	9	255,0,204
 
-The easiest way to create this file: cat segment_dense.bed | sed '1d' | cut -f4,9 | sort | uniq > my_map.txt
+The easiest way to create this file:
+
+```bash
+cat dense.bed | sed '1d' | cut -f4,9 | sort | uniq > my_map.txt
+```
+
 then edit by hand.
-...
 
-In this example, state 3,4,8 changed to 3.
-
-new_color should be the same for the same new_state.
+In this example, state 3,4,8 changed to 3 (because they are all low state in my case).
+new_color should be the same for the same new_state. Be aware that, after combining states, the
+total number of states will be less than what you specifiy when you run `chromHMM`. In this example,
+chromHMM was run in 15 state model. After combining low states, it now only has 13 states. `epilogos`
+requires the recoded states in a consecutive order (from 1 to 13), you can not have something like:
+1,2,3,3,5,6,7,3,9,10,11,12,13,14,15 as your recoded states.
 
 
 """
@@ -91,21 +98,32 @@ def check_file_type(file_type, ifile):
             raise Exception("the dense file should have only 9 columns.")
 
 
+def check_new_states(new_states):
+    """
+    check if the recoded new states in consecutive order
+    new_states is a list of new states in the map file.
+    """
+    sort_list = [int(x) for x in sorted(new_states)]
+    return max(sort_list) == len(set(sort_list))
+
 def read_map(file_type, ifile, map_file):
     map_dict = {}
     with open(map_file) as f:
         # skip header
         f.readline()
+        new_states = []
         for line in f:
             line_split = line.strip().split('\t')
             old_state = line_split[0]
             new_state = line_split[1]
             new_color = line_split[2]
             map_dict[old_state] = [new_state, new_color]
-        if len(map_dict) == check_state_num(file_type, ifile):
+            new_states.append(new_state)
+        if len(map_dict) == check_state_num(file_type, ifile) and check_new_states(new_states):
             return map_dict
         else:
-            raise Exception("the number of states in the mapping file is not the same as the input file ")
+            raise Exception("the number of states in the mapping file should be the same \
+             as the input file and the recoded states should be consecutive numbers.")
 
 def remap_per_line(file_type, line, map_dict):
     """
