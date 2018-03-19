@@ -1,0 +1,40 @@
+{
+    "__default__" :
+    {
+        "time" : "00:15",
+        "cpu": 1,
+        "email" : "mtang1@mdanderson.org",
+        "EmailNotice": "N",
+        "MaxMem": 16384,
+        "queue" : "short"
+    },
+    "tile_seg" :
+    {
+        "time" : "0:30",
+        "cpu" : 1
+    },
+    "state_recode_seg":
+    {
+        "time" : "0:30",
+        "cpu" : 1
+    },
+    "combine_sample_segs":
+    {
+        "time" : "0:30",
+        "cpu" : 1
+    },
+    "split_epilogos_input_by_chr":
+    {
+        "time" : "0:30",
+        "cpu": 1
+    },
+    "run_epilogos_by_chr":
+    {
+        "time" : "0:30",
+        "cpu" : 1
+    },
+    "merge_epilogos":
+    {
+        "time" : "00:20"
+    }
+}

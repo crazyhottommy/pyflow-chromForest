@@ -1,0 +1,31 @@
+
+##chromHMM bin size
+bin_size: 1000
+#chromatin state model
+state: 15
+
+## state and color remap file
+map_file: ./my_map.txt
+
+
+# space seperated chromosome names for the segment file.
+CHR: 'chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY chrM'
+
+# or
+# CHR: "1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 X Y"
+
+##############################################################################
+#######        epilogos parameters                       #####################
+##############################################################################
+
+measurementType: 0
+numStates: 13
+groupSpec: "4,21,28,34,36"
+# "7-9,35,37,38"
+
+
+
+
+SAMPLES_JSON: './samples.json'
+
+CLUSTER_JSON: './cluster.json'
