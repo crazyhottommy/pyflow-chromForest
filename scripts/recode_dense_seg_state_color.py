@@ -9,7 +9,7 @@ you will need to provide a mapping file for new state and color.
 
 for segment.bed file, there is no header and the 4th state column has a prefix E. e.g. E1, E2...E15
 for dense.bed file, there is a header and the 4th state column is just a number. e.g. 1,2...15. The 9th column is RGB color.
-python change_dense_bed_color.py --file_type [dense, seg] --infile segment_dense.bed --state_color_map my_map.txt  --ofile segment_new_color.bed
+python recode_dense_seg_state_color.py --file_type [dense, seg] --infile segment_dense.bed --state_color_map my_map.txt  --ofile segment_new_color.bed
 
 The my_map.txt file looks like (header required):
 old_state	new_state	new_color
