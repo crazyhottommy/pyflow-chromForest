@@ -7,9 +7,6 @@ configfile: "config.yaml"
 CLUSTER = json.load(open(config['CLUSTER_JSON']))
 FILES = json.load(open(config['SAMPLES_JSON']))
 
-import csv
-import os
-
 SAMPLES = sorted(FILES.keys())
 
 ALL_TILTED_SEG = expand("01tile_seg/{sample}_seg.bed", sample = SAMPLES)
