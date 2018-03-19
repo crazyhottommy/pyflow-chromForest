@@ -1,9 +1,10 @@
 ## Snakemake workflow for epilogos on chromHMM data
 
-chromHMM is to detect
+[chromHMM](http://compbio.mit.edu/ChromHMM/) is software for learning and characterizing chromatin states based on a multivariate Hidden Markov Model. ChromHMM can integrate multiple chromatin datasets such as ChIP-seq data of various histone modifications to discover de novo the major re-occuring combinatorial and spatial patterns of marks.
 
-
-epilogos is developed to summarise multiple chromHMM profiles across samples.
+[epilogos](https://github.com/Altius/epilogos) is developed to summarise multiple chromHMM profiles across samples.
+From here https://epilogos.altiusinstitute.org/ , you can visualize pre-computed epilogos for
+various ENCODE/epigenomeRoadmap tissue and cell lines.
 
 epilogos can only run in a  per-chromosome manner. That's why I wrote this snakemake workflow to
 simplify this process.
@@ -14,10 +15,10 @@ you need to do the same task for more than 3 times, write a workflow :)
 ### Dependencies
 
 1. `R/3.4.1` and above.
-bioconductor packages: `GenomicRanges`, `rtracklayer`
+bioconductor packages: `GenomicRanges`, `rtracklayer`.
 R packages:  `tidyverse`, `purrr`, `stringr`.
 
-2. `python3.x`
+2. `python3.x`.
 
 3. `epilogos`.
 
@@ -26,7 +27,9 @@ R packages:  `tidyverse`, `purrr`, `stringr`.
 
 ### steps
 
-work flow.
+workflow:
+
+![](./pics/rulegraph.png)
 
 #### submit jobs in `LSF` system.
 
@@ -40,16 +43,19 @@ ssh railab
 # start a screen session
 screen
 
-# snakemake needs python 3
+# create a py3 environment
+conda create -n py351 python=3.5 snakemake
+
+# activate the environment
 source activate py351
 # some R packages only for this R version
 module load R/3.4.1-shlib
 
-git clone
+git clone https://github.com/crazyhottommy/pyflow-epilogos
 
 cd pyflow-epilogos
 
-python3 samples2json.py --segment_dir /full/path/to/a/folder/containing/segments.bed
+python3 samples2json.py --segment_dir /full/path/to/a/folder/containing/segments
 # some info will be printed out and you can check the samples.json file.
 
 # change some settings
@@ -74,7 +80,7 @@ snakemake -j4
 
 ### technical details.
 
-chromHMM outputs various files. Two that I am working on are: `segments.bed` and `dense.bed` files.
+chromHMM outputs various files. Two that you may want to know: `segments.bed` and `dense.bed` files.
 For `segments.bed` file, there is no header and the 4th state column has a prefix E. e.g. E1, E2...E15;
 for `dense.bed` file, there is a header and the 4th state column is just a number. e.g. 1,2...15. The 9th column is RGB color.
 This file is used for loading to `IGV` for visualization.
@@ -85,20 +91,20 @@ same state. We need to tile the `segments.bed` file back to bin size.  check `ti
 **About state recoding**:
 
 `chromHMM` needs user to specify the number of state model. (e.g. 15, 18, or any number). Many times, if one checks the
-`emission_18.png` file, there are some redundant states. For example, multiple states are all low, but was assigned a
-different state number for each one of them. Those states can be combined. see below for a script to deal with it.
+`emission_18.png` chromHMM output emission file, there are some redundant states. For example, multiple states are all low, but was assigned a different state number for each one of them. Those states can be combined. see below for a script to deal with it.
 
 
 ### Utilities
 
-In side the `scripts` folder, there are helper scripts for various tasks.
+Inside the `scripts` folder, there are helper scripts for various tasks.
 
 1. `recode_dense_seg_state_color.py`
 
-This script can recode the state according to map file for either `dense.bed` or `segments.bed` file.
+This script can recode the state according to a map file for either `dense.bed` or `segments.bed` file.
 
-
-`python recode_dense_seg_state_color.py --file_type [dense, seg] --infile segment_dense.bed --state_color_map my_map.txt  --ofile segment_new_color.bed`
+```bash
+python recode_dense_seg_state_color.py --file_type [dense, seg] --infile segment_dense.bed --state_color_map my_map.txt  --ofile segment_new_color.bed`
+```
 
 The my_map.txt file looks like (header required):
 old_state	new_state	new_color
@@ -107,8 +113,8 @@ old_state	new_state	new_color
 11	11	204,204,102
 12	12	255,255,0
 13	13	255,255,204
-14	14	102,51,153
-15	15	102,153,51
+14	4	102,51,153
+15	8	102,153,51
 2	2	0,153,204
 3	3	0,255,255
 4	3	0,255,255
@@ -127,7 +133,11 @@ cat dense.bed | sed '1d' | cut -f4,9 | sort | uniq > my_map.txt
 then edit by hand.
 
 In this example, state 3,4,8 changed to 3 (because they are all low state in my case).
-new_color should be the same for the same new_state.
+new_color should be the same for the same new_state. Be aware that, after combining states, the
+total number of states will be less than what you specifiy when you run `chromHMM`. In this example,
+chromHMM was run in 15 state model. After combining low states, it now only has 13 states. `epilogos`
+requires the recoded states in a consecutive order (from 1 to 13), you can not have something like:
+1,2,3,3,5,6,7,3,9,10,11,12,13,14,15 as your recoded states.  
 
 2. `merge_bin.py`
 
