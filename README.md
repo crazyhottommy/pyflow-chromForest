@@ -107,6 +107,8 @@ python recode_dense_seg_state_color.py --file_type [dense, seg] --infile segment
 ```
 
 The my_map.txt file looks like (header required):
+
+```
 old_state	new_state	new_color
 1	1	0,0,255
 10	10	204,153,255
@@ -123,7 +125,7 @@ old_state	new_state	new_color
 7	7	0,0,51
 8	3	0,255,255
 9	9	255,0,204
-
+```
 The easiest way to create this file:
 
 ```bash
@@ -137,7 +139,7 @@ new_color should be the same for the same new_state. Be aware that, after combin
 total number of states will be less than what you specifiy when you run `chromHMM`. In this example,
 chromHMM was run in 15 state model. After combining low states, it now only has 13 states. `epilogos`
 requires the recoded states in a consecutive order (from 1 to 13), you can not have something like:
-1,2,3,3,5,6,7,3,9,10,11,12,13,14,15 as your recoded states.  
+1,2,3,3,5,6,7,3,9,10,11,12,13,14,15 as your recoded states.
 
 2. `merge_bin.py`
 
