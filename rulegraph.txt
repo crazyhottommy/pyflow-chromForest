@@ -2,20 +2,29 @@ digraph snakemake_dag {
     graph[bgcolor=white, margin=0];
     node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
     edge[penwidth=2, color=grey];
-	0[label = "state_recode_seg", color = "0.38 0.6 0.85", style="rounded"];
-	1[label = "merge_epilogos", color = "0.00 0.6 0.85", style="rounded"];
-	2[label = "split_epilogos_input_by_chr", color = "0.10 0.6 0.85", style="rounded"];
-	3[label = "run_epilogos_by_chr", color = "0.19 0.6 0.85", style="rounded"];
-	4[label = "tile_seg", color = "0.48 0.6 0.85", style="rounded"];
-	5[label = "combine_sample_segs", color = "0.57 0.6 0.85", style="rounded"];
-	6[label = "all", color = "0.29 0.6 0.85", style="rounded"];
-	4 -> 0
+	0[label = "run_vsurf_by_chr", color = "0.42 0.6 0.85", style="rounded"];
+	1[label = "run_epilogos_by_chr", color = "0.61 0.6 0.85", style="rounded"];
+	2[label = "merge_bin_vsurf", color = "0.06 0.6 0.85", style="rounded"];
+	3[label = "split_epilogos_input_by_chr", color = "0.00 0.6 0.85", style="rounded"];
+	4[label = "combine_sample_segs", color = "0.12 0.6 0.85", style="rounded"];
+	5[label = "state_recode_seg", color = "0.48 0.6 0.85", style="rounded"];
+	6[label = "split_vsurf_input_by_chr", color = "0.18 0.6 0.85", style="rounded"];
+	7[label = "prefilter_vsurf", color = "0.36 0.6 0.85", style="rounded"];
+	8[label = "tile_seg", color = "0.55 0.6 0.85", style="rounded"];
+	9[label = "merge_epilogos", color = "0.24 0.6 0.85", style="rounded"];
+	10[label = "all", color = "0.30 0.6 0.85", style="rounded"];
+	6 -> 0
 	3 -> 1
-	5 -> 2
-	2 -> 3
-	0 -> 5
-	4 -> 6
-	0 -> 6
-	1 -> 6
-	5 -> 6
+	4 -> 2
+	4 -> 3
+	5 -> 4
+	8 -> 5
+	7 -> 6
+	2 -> 7
+	1 -> 9
+	0 -> 10
+	5 -> 10
+	8 -> 10
+	9 -> 10
+	4 -> 10
 }            
