@@ -1,4 +1,4 @@
-## Snakemake workflow for epilogos on chromHMM data
+## Snakemake workflow for epilogos on chromHMM data and running VSURF for feature selection
 
 [chromHMM](http://compbio.mit.edu/ChromHMM/) is software for learning and characterizing chromatin states based on a multivariate Hidden Markov Model. ChromHMM can integrate multiple chromatin datasets such as ChIP-seq data of various histone modifications to discover de novo the major re-occuring combinatorial and spatial patterns of marks.
 
@@ -8,6 +8,11 @@ various ENCODE/epigenomeRoadmap tissue and cell lines.
 
 epilogos can only run in a  per-chromosome manner. That's why I wrote this snakemake workflow to
 simplify this process.
+
+[VSURF](https://cran.r-project.org/web/packages/VSURF/index.html) is an R package designed to do feature selection by random forest.
+
+When you have groups of chromHMM calls, you want to identify the features(bins) that can differentiate the subgroups.(tissues, cancer types etc). If one run chromHMM with 1 kb bin, the whole genome will be segmented into roughly 3 million bins. This is just huge, and
+we need some machine learning algorithum to select features out of this 3 million bins.
 
 When you copy and paste the same code three times, it is time to write a function. Similarily, if
 you need to do the same task for more than 3 times, write a workflow :)
@@ -29,7 +34,7 @@ R packages:  `tidyverse`, `purrr`, `stringr`.
 
 workflow:
 
-![](./pics/rulegraph.png)
+![](./pics/rulegraph2.png)
 
 #### submit jobs in `LSF` system.
 
@@ -57,9 +62,18 @@ cd pyflow-epilogos
 
 python3 samples2json.py --segment_dir /full/path/to/a/folder/containing/segments
 # some info will be printed out and you can check the samples.json file.
+```
 
+Prepare a meta data file describing the sample and the response.
+see `tumor_meta_data.txt` in the repo for an example. This file needs to be two columns with
+header. The first column must be named `sample`, the second column can be named by you.
+The first column should contain the ids of the sample which should match the sample names in
+the `samples.json` file output by `samples2json.py`.
+
+```bash
 # change some settings
 nano config.ymal
+
 
 # dry run
 snakemake -np
