@@ -24,7 +24,14 @@ groupSpec: "4,21,28,34,36"
 # "7-9,35,37,38"
 
 
+###############################################################################
+#######           vsurf random forest feature selection         ##############
+###############################################################################
 
+# this file should be 2 two column file with header
+# the first column with name "sample" and the ids that match the sample id in the
+# samples.json file. the second column is the response. e.g. subtypes, tumor, normal
+meta_data: "tumor_meta_data.txt"
 
 SAMPLES_JSON: './samples.json'
 
