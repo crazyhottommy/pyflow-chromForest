@@ -8,11 +8,15 @@ CLUSTER = json.load(open(config['CLUSTER_JSON']))
 FILES = json.load(open(config['SAMPLES_JSON']))
 
 SAMPLES = sorted(FILES.keys())
+chrs = config["CHR"]
+CHR = chrs.split(" ")
+
 
 ALL_TILTED_SEG = expand("01tile_seg/{sample}_seg.bed", sample = SAMPLES)
 ALL_RECODE_SEG = expand("02state_recode/{sample}_recode_seg.bed", sample = SAMPLES)
 EPILOGOS_INPUT = ["03combine_sample_segs/epilogos_input.txt"]
 EPILOGOS_OUTPUT = ["06epilogos_output/merged_epilogos_qcat.bed.gz"]
+VSURF_OUTPUT = expand("09vsurf_output_by_chr/{chromosome}_vsurf_out.rda", chromosome = CHR)
 
 TARGETS = []
 TARGETS.extend(ALL_TILTED_SEG)
@@ -61,10 +65,6 @@ rule combine_sample_segs:
     message: "combining the recoded segments across samples and make epilogos input file"
     script: "scripts/combine_sample_segs.R"
 
-
-chrs = config["CHR"]
-CHR = chrs.split(" ")
-
 rule split_epilogos_input_by_chr:
     input: "03combine_sample_segs/epilogos_input.txt"
     output: expand("04epilogos_input_by_chr/{chromosome}.txt", chromosome = CHR)
@@ -81,6 +81,7 @@ rule run_epilogos_by_chr:
     input : "04epilogos_input_by_chr/{chromosome}.txt"
     output: "05epilogos_output_by_chr/{chromosome}/qcat.bed.gz"
     threads: 1
+    params: jobname = "{chromosome}"
     message: "computing epilogos for {input}"
     shell:
         r"""
@@ -98,3 +99,50 @@ rule merge_epilogos:
         r"""
         zcat {input} | bgzip > {output}
         """
+
+rule merge_bin_vsurf:
+    input: "03combine_sample_segs/combined_seg.txt"
+    output: "07vsurf_input/vsurf_bin_merged_seg.txt"
+    threads: 1
+    message: "merging bins for vsurf input"
+    shell:
+        r"""
+        scripts/merge_bin.py --ifile {input} --ofile {output}
+        """
+
+rule prefilter_vsurf:
+    input: "07vsurf_input/vsurf_bin_merged_seg.txt"
+    output:
+        "07vsurf_input/vsurf_prefilter_bin_merge_seg_id.txt",
+        "07vsurf_input/vsurf_prefilter_bin_merge_seg.txt"
+    threads: 1
+    message: "pre-filtering segments for vsurf."
+    script: "scripts/prefilter_vsurf.R"
+
+rule split_vsurf_input_by_chr:
+    input: "07vsurf_input/vsurf_prefilter_bin_merge_seg.txt"
+    output: expand("08vsurf_input_by_chr/{chromosome}_vsurf.txt", chromosome = CHR)
+    threads: 1
+    message: "splitting vsurf input by chromosome for {input}"
+    shell:
+        """
+        # snakemake will create that folder if it is not exsit
+        # keep the header to each of the chromosome data.
+        awk 'NR == 1 {{header=$0; next}}
+            f!= "08vsurf_input_by_chr/"$1"_vsurf.txt"{{
+            if(f) close(f)
+            f="08vsurf_input_by_chr/"$1"_vsurf.txt"
+            print header > f
+            }}
+            {{print $0 >> f;close(f)}}'  {input}
+        """
+
+rule run_vsurf_by_chr:
+    input:
+        vsurf_input = "08vsurf_input_by_chr/{chromosome}_vsurf.txt",
+        meta_data = config["meta_data"]
+    output: "09vsurf_output_by_chr/{chromosome}_vsurf_out.rda"
+    threads: 24
+    params: jobname = "{chromosome}"
+    message: "runing vsurf random forest feature selection for {input}"
+    script: "scripts/vsurf_feature_selection.R"
