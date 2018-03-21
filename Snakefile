@@ -23,6 +23,7 @@ TARGETS.extend(ALL_TILTED_SEG)
 TARGETS.extend(ALL_RECODE_SEG)
 TARGETS.extend(EPILOGOS_INPUT)
 TARGETS.extend(EPILOGOS_OUTPUT)
+TARGETS.extend(VSURF_OUTPUT)
 
 localrules: all
 rule all:
