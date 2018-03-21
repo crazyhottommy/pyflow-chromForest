@@ -36,5 +36,25 @@
     "merge_epilogos":
     {
         "time" : "00:20"
+    },
+    "merge_bin_vsurf":
+    {
+        "time" : "00:20"
+    },
+    "prefilter_vsurf":
+    {
+       "time" :"1:00"
+    },
+    "split_vsurf_input_by_chr":
+    {
+       "time" : "0:30"
+    },
+    "run_vsurf_by_chr":
+    {
+       "time": "24:00",
+       "cpu": 12,
+       "MaxMem": 81920,
+       "queue" : "medium"
     }
+
 }
