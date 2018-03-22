@@ -32,6 +32,7 @@ chr1	71615400	71615600	E15
 
 """
 import argparse
+
 def choose_state_per_line(line):
     line_split = line.strip().split('\t')
     chr = line_split[0]
