@@ -53,8 +53,14 @@
     {
        "time": "24:00",
        "cpu": 12,
-       "MaxMem": 81920,
+       "MaxMem": 16384,
        "queue" : "medium"
+    },
+    "run_vsurf_genome":
+    {
+       "time" : "24:00",
+       "cpu": 12,
+       "MaxMem": 16384,
+       "queue": "medium"
     }
-
 }

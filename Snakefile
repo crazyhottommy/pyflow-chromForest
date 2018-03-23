@@ -17,17 +17,18 @@ ALL_RECODE_SEG = expand("02state_recode/{sample}_recode_seg.bed", sample = SAMPL
 EPILOGOS_INPUT = ["03combine_sample_segs/epilogos_input.txt"]
 EPILOGOS_OUTPUT = ["06epilogos_output/merged_epilogos_qcat.bed.gz"]
 #VSURF_OUTPUT = dynamic("09vsurf_output_by_chr/{chromosome}_vsurf_out.rda")
+VSURF_GENOME_OUTPUT = ["10vsurf_output_genome/vsurf_genome_out.rda"]
 
 TARGETS = []
 TARGETS.extend(ALL_TILTED_SEG)
 TARGETS.extend(ALL_RECODE_SEG)
 TARGETS.extend(EPILOGOS_INPUT)
 TARGETS.extend(EPILOGOS_OUTPUT)
-#TARGETS.extend(VSURF_OUTPUT)
+TARGETS.extend(VSURF_GENOME_OUTPUT)
 
 localrules: all
 rule all:
-    input: TARGETS, dynamic("09vsurf_output_by_chr/{chromosome}_vsurf_out.rda")
+    input: TARGETS
 
 
 rule tile_seg:
@@ -122,7 +123,7 @@ rule prefilter_vsurf:
 
 rule split_vsurf_input_by_chr:
     input: "07vsurf_input/vsurf_prefilter_bin_merge_seg.txt"
-    output: dynamic("08vsurf_input_by_chr/{chromosome}_vsurf.txt")
+    output: expand("08vsurf_input_by_chr/{chromosome}_vsurf.txt", chromosome = CHR)
     threads: 1
     message: "splitting vsurf input by chromosome for {input}"
     shell:
@@ -143,7 +144,16 @@ rule run_vsurf_by_chr:
         vsurf_input = "08vsurf_input_by_chr/{chromosome}_vsurf.txt",
         meta_data = config["meta_data"]
     output: "09vsurf_output_by_chr/{chromosome}_vsurf_out.rda"
-    threads: 24
+    threads: 12
     params: jobname = "{chromosome}"
     message: "runing vsurf random forest feature selection for {input}"
     script: "scripts/vsurf_feature_selection.R"
+
+rule run_vsurf_genome:
+    input:
+        rdas = expand("09vsurf_output_by_chr/{chromosome}_vsurf_out.rda", chromosome = CHR),
+        meta_data = config["meta_data"]
+    output: "10vsurf_output_genome/vsurf_genome_out.rda"
+    threads: 12
+    message: "running vsurf random forest feature selection for whole genome"
+    script: "scripts/vsurf_feature_selection_genome.R"
