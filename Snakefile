@@ -16,14 +16,14 @@ ALL_TILTED_SEG = expand("01tile_seg/{sample}_seg.bed", sample = SAMPLES)
 ALL_RECODE_SEG = expand("02state_recode/{sample}_recode_seg.bed", sample = SAMPLES)
 EPILOGOS_INPUT = ["03combine_sample_segs/epilogos_input.txt"]
 EPILOGOS_OUTPUT = ["06epilogos_output/merged_epilogos_qcat.bed.gz"]
-#VSURF_OUTPUT = dynamic("09vsurf_output_by_chr/{chromosome}_vsurf_out.rda")
+VSURF_GENOME_OUTPUT = ["10vsurf_output_genome/vsurf_genome_out.rda"]
 
 TARGETS = []
 TARGETS.extend(ALL_TILTED_SEG)
 TARGETS.extend(ALL_RECODE_SEG)
 TARGETS.extend(EPILOGOS_INPUT)
 TARGETS.extend(EPILOGOS_OUTPUT)
-#TARGETS.extend(VSURF_OUTPUT)
+TARGETS.extend(VSURF_GENOME_OUTPUT )
 
 localrules: all
 rule all:
@@ -147,3 +147,12 @@ rule run_vsurf_by_chr:
     params: jobname = "{chromosome}"
     message: "runing vsurf random forest feature selection for {input}"
     script: "scripts/vsurf_feature_selection.R"
+
+rule run_vsurf_genome:
+    input:
+        rdas = dynamic("09vsurf_output_by_chr/{chromosome}_vsurf_out.rda"),
+        meta_data = config["meta_data"]
+    output: "10vsurf_output_genome/vsurf_genome_out.rda"
+    threads: 12
+    message: "running vsurf random forest feature selection for whole genome"
+    script: "scripts/vsurf_feature_selection_genome.R"
